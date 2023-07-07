@@ -35,7 +35,6 @@ import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
-
 import androidx.annotation.FloatRange;
 import androidx.annotation.Nullable;
 
@@ -72,6 +71,7 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.AlarmTimeout;
 import com.android.systemui.util.wakelock.DelayedWakeLock;
 import com.android.systemui.util.wakelock.WakeLock;
+import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
@@ -1093,6 +1093,10 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         mUpdatePending = true;
     }
 
+    public boolean isLandscape() {
+        return getResources().getConfiguration().orientation == ORIENTATION_LANDSCAPE;
+    }
+
     protected void updateScrims() {
         // Make sure we have the right gradients and their opacities will satisfy GAR.
         if (mNeedsDrawableColorUpdate) {
@@ -1104,7 +1108,11 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
                     && !mBlankScreen;
 
             mScrimInFront.setColors(mColors, animateScrimInFront);
-            mScrimBehind.setColors(mBehindColors, animateBehindScrim);
+            if(!isLandscape()) {
+                mScrimBehind.setColors(mBehindColors, animateBehindScrim);
+            } else{
+                mScrimBehind.setColors(mColors, animateBehindScrim);
+            }
             mNotificationsScrim.setColors(mColors, animateScrimNotifications);
 
             dispatchBackScrimState(mScrimBehind.getViewAlpha());
